@@ -3,7 +3,6 @@ use std::io::{self, Write};
 
 fn main() {
     print!("$ ");
-    io::stdout().flush().unwrap();
 
     // Wait for user input
     let stdin = io::stdin();
