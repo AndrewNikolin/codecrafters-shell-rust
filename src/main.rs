@@ -22,10 +22,26 @@ fn process_input() {
             let command = input.trim().split_whitespace().next().unwrap();
             match command {
                 "echo" => echo(input),
+                "type" => type_command(input),
                 _ => println!("{}: command not found", command),
             }
         },
     }
+}
+
+fn type_command(input: String) {
+    let _command = input.trim().split_whitespace().skip(1).next().unwrap();
+
+    match _command {
+        "echo" => print_builtin("echo"),
+        "type" => print_builtin("type"),
+        "exit" => print_builtin("exit"),
+        _ => println!("{}: not found", _command),
+    }
+}
+
+fn print_builtin(x: &str) {
+    println!("{} is a shell builtin", x)
 }
 
 fn echo(input: String) {
