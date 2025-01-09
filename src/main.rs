@@ -47,6 +47,7 @@ fn find_in_path(_command: &str) {
         let full_path = format!("{}/{}", p, _command);
         if std::path::Path::new(&full_path).exists() {
             println!("{} is {}", _command, full_path);
+            break;
         }
     }
 
