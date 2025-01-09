@@ -20,13 +20,27 @@ fn process_input() {
         "exit 0" => std::process::exit(0),
         _ => {
             let command = input.trim().split_whitespace().next().unwrap();
+            let arguments = input.trim().split_whitespace().skip(1).collect::<Vec<&str>>();
             match command {
                 "echo" => echo(input),
                 "type" => type_command(input),
-                _ => println!("{}: command not found", command),
+                _ => handle_arbitrary_command(command, arguments),
             }
         }
     }
+}
+
+fn handle_arbitrary_command(command: &str, arguments: Vec<&str>) {
+    match locate_in_path(command) {
+        Some(full_path) => execute(full_path, arguments),
+        None => println!("{}: command not found", command),
+    }
+}
+
+fn execute(command_path: String, arguments: Vec<&str>) {
+    let mut command = std::process::Command::new(command_path);
+    command.args(arguments);
+    command.spawn().unwrap().wait().unwrap();
 }
 
 fn type_command(input: String) {
