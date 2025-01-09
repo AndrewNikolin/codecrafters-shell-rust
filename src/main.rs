@@ -18,6 +18,17 @@ fn process_input() {
 
     match input.trim() {
         "exit 0" => std::process::exit(0),
-        _ => println!("{}: command not found", input.trim()),
+        _ => {
+            let command = input.trim().split_whitespace().next().unwrap();
+            match command {
+                "echo" => echo(input),
+                _ => println!("{}: command not found", command),
+            }
+        },
     }
+}
+
+fn echo(input: String) {
+    let message = input.trim().split_whitespace().skip(1).collect::<Vec<&str>>().join(" ");
+    println!("{}", message);
 }
