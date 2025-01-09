@@ -35,6 +35,7 @@ fn type_command(input: String) {
     match _command {
         "type" => print_builtin("type"),
         "exit" => print_builtin("exit"),
+        "echo" => print_builtin("echo"),
         _ => find_in_path(_command),
     }
 }
