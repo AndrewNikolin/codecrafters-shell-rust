@@ -25,12 +25,23 @@ fn process_input() {
                 "type" => type_command(input),
                 _ => println!("{}: command not found", command),
             }
-        },
+        }
     }
 }
 
 fn type_command(input: String) {
     let _command = input.trim().split_whitespace().skip(1).next().unwrap();
+
+    let path = std::env::var("PATH").unwrap();
+    let paths = path.split(":").collect::<Vec<&str>>();
+
+    for p in paths {
+        let full_path = format!("{}/{}", p, _command);
+        if std::path::Path::new(&full_path).exists() {
+            println!("{} is {}", _command, full_path);
+            return;
+        }
+    }
 
     match _command {
         "echo" => print_builtin("echo"),
@@ -45,6 +56,12 @@ fn print_builtin(x: &str) {
 }
 
 fn echo(input: String) {
-    let message = input.trim().split_whitespace().skip(1).collect::<Vec<&str>>().join(" ");
+    let message = input
+        .trim()
+        .split_whitespace()
+        .skip(1)
+        .collect::<Vec<&str>>()
+        .join(" ");
+
     println!("{}", message);
 }
