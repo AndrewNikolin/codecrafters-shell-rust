@@ -32,7 +32,7 @@ fn process_input() {
 
 fn handle_arbitrary_command(command: &str, arguments: Vec<&str>) {
     match locate_in_path(command) {
-        Some(full_path) => execute(full_path, arguments),
+        Some(full_path) => execute(command.to_string(), arguments),
         None => println!("{}: command not found", command),
     }
 }
