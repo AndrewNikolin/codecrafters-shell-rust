@@ -2,12 +2,12 @@
 use std::io::{self, Write};
 
 fn main() {
-    while true {
-        ProcessInput();
+    loop {
+        process_input();
     }
 }
 
-fn ProcessInput() {
+fn process_input() {
     print!("$ ");
     io::stdout().flush().unwrap();
 
