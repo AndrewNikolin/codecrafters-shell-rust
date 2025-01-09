@@ -41,18 +41,24 @@ fn type_command(input: String) {
 }
 
 fn find_in_path(_command: &str) {
+    match locate_in_path(_command) {
+        Some(full_path) => println!("{} is {}", _command, full_path),
+        None => println!("{}: not found", _command),
+    }
+}
+
+fn locate_in_path(_command: &str) -> Option<String> {
     let path = std::env::var("PATH").unwrap();
     let paths = path.split(":").collect::<Vec<&str>>();
 
     for p in paths {
         let full_path = format!("{}/{}", p, _command);
         if std::path::Path::new(&full_path).exists() {
-            println!("{} is {}", _command, full_path);
-            return;
+
+            return Some(full_path);
         }
     }
-
-    println!("{}: not found", _command);
+    None
 }
 
 fn print_builtin(x: &str) {
