@@ -1,6 +1,8 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
+const BUILT_IN_COMMANDS: [&'static str; 4] = ["type", "exit", "echo", "pwd"];
+
 fn main() {
     loop {
         process_input();
@@ -28,6 +30,7 @@ fn process_input() {
             match command {
                 "echo" => echo(input),
                 "type" => type_command(input),
+                "pwd"  => println!("{}", std::env::current_dir().unwrap().display()),
                 _ => handle_arbitrary_command(command, arguments),
             }
         }
@@ -61,11 +64,10 @@ fn execute(command_path: String, arguments: Vec<&str>) {
 fn type_command(input: String) {
     let _command = input.trim().split_whitespace().skip(1).next().unwrap();
 
-    match _command {
-        "type" => print_builtin("type"),
-        "exit" => print_builtin("exit"),
-        "echo" => print_builtin("echo"),
-        _ => find_in_path(_command),
+    if (BUILT_IN_COMMANDS.contains(&_command)) {
+        println!("{} is a shell builtin", _command);
+    } else {
+        find_in_path(_command);
     }
 
     fn print_builtin(x: &str) {
