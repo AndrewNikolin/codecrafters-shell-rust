@@ -64,7 +64,7 @@ fn execute(command_path: String, arguments: Vec<&str>) {
 fn type_command(input: String) {
     let _command = input.trim().split_whitespace().skip(1).next().unwrap();
 
-    if (BUILT_IN_COMMANDS.contains(&_command)) {
+    if BUILT_IN_COMMANDS.contains(&_command) {
         println!("{} is a shell builtin", _command);
     } else {
         find_in_path(_command);
