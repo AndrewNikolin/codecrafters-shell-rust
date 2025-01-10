@@ -20,7 +20,11 @@ fn process_input() {
         "exit 0" => std::process::exit(0),
         _ => {
             let command = input.trim().split_whitespace().next().unwrap();
-            let arguments = input.trim().split_whitespace().skip(1).collect::<Vec<&str>>();
+            let arguments = input
+                .trim()
+                .split_whitespace()
+                .skip(1)
+                .collect::<Vec<&str>>();
             match command {
                 "echo" => echo(input),
                 "type" => type_command(input),
@@ -28,11 +32,22 @@ fn process_input() {
             }
         }
     }
+
+    fn echo(input: String) {
+        let message = input
+            .trim()
+            .split_whitespace()
+            .skip(1)
+            .collect::<Vec<&str>>()
+            .join(" ");
+
+        println!("{}", message);
+    }
 }
 
 fn handle_arbitrary_command(command: &str, arguments: Vec<&str>) {
     match locate_in_path(command) {
-        Some(full_path) => execute(command.to_string(), arguments),
+        Some(_) => execute(command.to_string(), arguments),
         None => println!("{}: command not found", command),
     }
 }
@@ -52,12 +67,16 @@ fn type_command(input: String) {
         "echo" => print_builtin("echo"),
         _ => find_in_path(_command),
     }
-}
 
-fn find_in_path(_command: &str) {
-    match locate_in_path(_command) {
-        Some(full_path) => println!("{} is {}", _command, full_path),
-        None => println!("{}: not found", _command),
+    fn print_builtin(x: &str) {
+        println!("{} is a shell builtin", x)
+    }
+
+    fn find_in_path(_command: &str) {
+        match locate_in_path(_command) {
+            Some(full_path) => println!("{} is {}", _command, full_path),
+            None => println!("{}: not found", _command),
+        }
     }
 }
 
@@ -68,24 +87,8 @@ fn locate_in_path(_command: &str) -> Option<String> {
     for p in paths {
         let full_path = format!("{}/{}", p, _command);
         if std::path::Path::new(&full_path).exists() {
-
             return Some(full_path);
         }
     }
     None
-}
-
-fn print_builtin(x: &str) {
-    println!("{} is a shell builtin", x)
-}
-
-fn echo(input: String) {
-    let message = input
-        .trim()
-        .split_whitespace()
-        .skip(1)
-        .collect::<Vec<&str>>()
-        .join(" ");
-
-    println!("{}", message);
 }
