@@ -1,7 +1,7 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
-const BUILT_IN_COMMANDS: [&'static str; 4] = ["type", "exit", "echo", "pwd"];
+const BUILT_IN_COMMANDS: [&str; 4] = ["type", "exit", "echo", "pwd"];
 
 fn main() {
     loop {
@@ -21,9 +21,8 @@ fn process_input() {
     match input.trim() {
         "exit 0" => std::process::exit(0),
         _ => {
-            let command = input.trim().split_whitespace().next().unwrap();
+            let command = input.split_whitespace().next().unwrap();
             let arguments = input
-                .trim()
                 .split_whitespace()
                 .skip(1)
                 .collect::<Vec<&str>>();
@@ -38,7 +37,6 @@ fn process_input() {
 
     fn echo(input: String) {
         let message = input
-            .trim()
             .split_whitespace()
             .skip(1)
             .collect::<Vec<&str>>()
@@ -62,16 +60,12 @@ fn execute(command_path: String, arguments: Vec<&str>) {
 }
 
 fn type_command(input: String) {
-    let _command = input.trim().split_whitespace().skip(1).next().unwrap();
+    let _command = input.split_whitespace().nth(1).unwrap();
 
     if BUILT_IN_COMMANDS.contains(&_command) {
         println!("{} is a shell builtin", _command);
     } else {
         find_in_path(_command);
-    }
-
-    fn print_builtin(x: &str) {
-        println!("{} is a shell builtin", x)
     }
 
     fn find_in_path(_command: &str) {
