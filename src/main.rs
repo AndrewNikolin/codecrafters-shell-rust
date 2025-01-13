@@ -30,6 +30,7 @@ fn process_input() {
                 "echo" => echo(input),
                 "type" => type_command(input),
                 "pwd"  => println!("{}", std::env::current_dir().unwrap().display()),
+                "cd"   => handle_cd(arguments),
                 _ => handle_arbitrary_command(command, arguments),
             }
         }
@@ -43,6 +44,16 @@ fn process_input() {
             .join(" ");
 
         println!("{}", message);
+    }
+}
+
+fn handle_cd(args: Vec<&str>) {
+    let new_dir = args.first().unwrap_or(&"");
+    let path = std::path::Path::new(new_dir);
+    if path.exists() {
+        std::env::set_current_dir(path).unwrap();
+    } else {
+        println!("cd: {}: No such file or directory", new_dir);
     }
 }
 
