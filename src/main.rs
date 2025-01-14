@@ -44,7 +44,7 @@ fn parse_arguments(input: String, command: &String) -> Vec<String> {
     let mut argument = String::new();
     let mut escape = false;
     for c in argument_string.chars() {
-        if c == '\'' || c == '"' {
+        if (c == '\'' || c == '"') && !escape {
             if quote_stack.is_empty() {
                 quote_stack.push(c);
             } else if *quote_stack.last().unwrap() == c {
@@ -69,6 +69,7 @@ fn parse_arguments(input: String, command: &String) -> Vec<String> {
             }
         } else {
             argument.push(c);
+            escape = false;
         }
     }
     
@@ -128,6 +129,15 @@ mod tests {
         let input = r#"cat "/tmp/file\\name" "/tmp/file\ name""#;
         let command = "cat".to_string();
         let expected = vec![r#"/tmp/file\\name"#, r#"/tmp/file\ name"#];
+        let result = parse_arguments(input.to_string(), &command);
+        assert_eq!(result, expected);
+    }
+    
+    #[test]
+    fn test_backslash_escape_quotes() {
+        let input = "echo \\\'\\\"test shell\\\"\\\'";
+        let command = "echo".to_string();
+        let expected = vec![r#"'"test"#, r#"shell"'"#];
         let result = parse_arguments(input.to_string(), &command);
         assert_eq!(result, expected);
     }
