@@ -42,6 +42,7 @@ fn parse_arguments(input: String, command: &String) -> Vec<String> {
     let mut quote_stack : Vec<char> = Vec::new();
     
     let mut argument = String::new();
+    let mut escape = false;
     for c in argument_string.chars() {
         if c == '\'' || c == '"' {
             if quote_stack.is_empty() {
@@ -51,8 +52,18 @@ fn parse_arguments(input: String, command: &String) -> Vec<String> {
             } else {
                 argument.push(c);
             }
+        } else if c == '\\' && quote_stack.is_empty() {
+            if escape {
+                argument.push(c);
+                escape = false;
+            } else {
+                escape = true;
+            }
         } else if c == ' ' && quote_stack.is_empty() {
-            if !argument.trim().is_empty() {
+            if escape {
+                argument.push(c);
+                escape = false;
+            } else if !argument.is_empty() {
                 result.push(argument.clone());
                 argument.clear();
             }
@@ -61,7 +72,7 @@ fn parse_arguments(input: String, command: &String) -> Vec<String> {
         }
     }
     
-    if !argument.trim().is_empty() {
+    if !argument.is_empty() {
         result.push(argument.clone());
     }
 
@@ -82,7 +93,6 @@ fn locate_in_path(_command: &str) -> Option<String> {
 }
 
 #[cfg(test)]
-#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -91,6 +101,33 @@ mod tests {
         let input = "echo 'Hello, World!' \"This 'is'   a test\"";
         let command = "echo".to_string();
         let expected = vec!["Hello, World!", "This 'is'   a test"];
+        let result = parse_arguments(input.to_string(), &command);
+        assert_eq!(result, expected);
+    }
+    
+    #[test]
+    fn test_backslash_escaping_in_quotes() {
+        let input = r#"echo "before\   after""#;
+        let command = "echo".to_string();
+        let expected = vec![r#"before\   after"#];
+        let result = parse_arguments(input.to_string(), &command);
+        assert_eq!(result, expected);
+    }
+    
+    #[test]
+    fn test_backslash_escaping() {
+        let input = r#"echo before\ \ after"#;
+        let command = "echo".to_string();
+        let expected = vec![r#"before  after"#];
+        let result = parse_arguments(input.to_string(), &command);
+        assert_eq!(result, expected);
+    }
+    
+    #[test]
+    fn test_backslash_cat() {
+        let input = r#"cat "/tmp/file\\name" "/tmp/file\ name""#;
+        let command = "cat".to_string();
+        let expected = vec![r#"/tmp/file\\name"#, r#"/tmp/file\ name"#];
         let result = parse_arguments(input.to_string(), &command);
         assert_eq!(result, expected);
     }
