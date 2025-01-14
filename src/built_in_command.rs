@@ -40,11 +40,17 @@ impl command::Command for BuiltInCommand {
         match self {
             BuiltInCommand::Echo(message) => println!("{}", message),
             BuiltInCommand::Cd(new_dir) => {
-                let path = std::path::Path::new(new_dir);
-                if path.exists() {
-                    std::env::set_current_dir(path).unwrap();
+                if new_dir.starts_with('~') {
+                    let home_dir = std::env::var("HOME").unwrap();
+                    let new_dir = new_dir.replacen("~", &home_dir, 1);
+                    std::env::set_current_dir(new_dir).unwrap();
                 } else {
-                    println!("cd: {}: No such file or directory", new_dir);
+                    let path = std::path::Path::new(new_dir);
+                    if path.exists() {
+                        std::env::set_current_dir(path).unwrap();
+                    } else {
+                        println!("cd: {}: No such file or directory", new_dir);
+                    }
                 }
             }
             BuiltInCommand::Pwd => println!("{}", std::env::current_dir().unwrap().display()),
