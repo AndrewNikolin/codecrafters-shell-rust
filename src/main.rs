@@ -36,7 +36,7 @@ fn process_input() {
 fn parse_arguments(input: String, command: &String) -> Vec<String> {
     let mut result = Vec::new();
     let argument_string = input
-        .replace(command, "")
+        .strip_prefix(command).unwrap()
         .trim().to_string();
     
     let mut quote_stack : Vec<char> = Vec::new();
