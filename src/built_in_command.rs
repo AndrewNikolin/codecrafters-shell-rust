@@ -1,7 +1,7 @@
 use crate::{command, locate_in_path};
 
 pub enum BuiltInCommand {
-    Echo(String),
+    Echo(Vec<String>),
     Cd(String),
     Pwd,
     Type(String),
@@ -9,12 +9,12 @@ pub enum BuiltInCommand {
 }
 
 impl BuiltInCommand {
-    pub fn try_from_string(command: String, argument: String) -> Result<BuiltInCommand, ()> {
+    pub fn try_from_string(command: String, arguments: Vec<String>) -> Result<BuiltInCommand, ()> {
         BuiltInCommand::try_from(&command).map(|c| match c {
-            BuiltInCommand::Echo(_) => BuiltInCommand::Echo(argument),
-            BuiltInCommand::Cd(_) => BuiltInCommand::Cd(argument),
-            BuiltInCommand::Type(_) => BuiltInCommand::Type(argument),
-            BuiltInCommand::Exit(_) => BuiltInCommand::Exit(argument.parse().unwrap()),
+            BuiltInCommand::Echo(_) => BuiltInCommand::Echo(arguments),
+            BuiltInCommand::Cd(_) => BuiltInCommand::Cd(arguments.first().unwrap().to_string()),
+            BuiltInCommand::Type(_) => BuiltInCommand::Type(arguments.first().unwrap().to_string()),
+            BuiltInCommand::Exit(_) => BuiltInCommand::Exit(arguments.first().unwrap().parse().unwrap()),
             _ => c,
         })
     }
@@ -25,7 +25,7 @@ impl TryFrom<&String> for BuiltInCommand {
 
     fn try_from(command: &String) -> Result<Self, Self::Error> {
         match command.to_lowercase().as_str() {
-            "echo" => Ok(BuiltInCommand::Echo("".to_string())),
+            "echo" => Ok(BuiltInCommand::Echo(vec![])),
             "cd" => Ok(BuiltInCommand::Cd("".to_string())),
             "pwd" => Ok(BuiltInCommand::Pwd),
             "type" => Ok(BuiltInCommand::Type("".to_string())),
@@ -38,7 +38,7 @@ impl TryFrom<&String> for BuiltInCommand {
 impl command::Command for BuiltInCommand {
     fn execute(&self) {
         match self {
-            BuiltInCommand::Echo(message) => println!("{}", message),
+            BuiltInCommand::Echo(messages) => println!("{}", messages.join(" ")),
             BuiltInCommand::Cd(new_dir) => {
                 if new_dir.starts_with('~') {
                     let home_dir = std::env::var("HOME").unwrap();

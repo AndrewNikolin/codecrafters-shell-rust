@@ -3,7 +3,7 @@ use crate::locate_in_path;
 
 pub struct CustomCommand {
     pub(crate) command: String,
-    pub(crate) argument: String,
+    pub(crate) arguments: Vec<String>,
 }
 
 impl Command for CustomCommand {
@@ -18,7 +18,7 @@ impl Command for CustomCommand {
 impl CustomCommand {
     fn execute_internal(&self) {
         let mut command = std::process::Command::new(&self.command);
-        command.args(self.argument.split_whitespace().collect::<Vec<&str>>());
+        command.args(self.arguments.iter());
         command.spawn().unwrap().wait().unwrap();
     }
 }
