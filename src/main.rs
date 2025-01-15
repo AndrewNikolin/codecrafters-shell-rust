@@ -52,13 +52,13 @@ fn get_command(input: &mut String) -> String {
                 break;
             }
         }
-        input.replace_range(..final_pos, "");
+        input.replace_range(..final_pos + 1, "");
         return command;
     }
 
     let input_parts = input.split_whitespace().collect::<Vec<&str>>();
     let command = input_parts.first().unwrap_or(&"").to_string();
-    input.replace_range(..command.len(), "");
+    input.replace_range(..command.len() + 1, "");
     command
 }
 
