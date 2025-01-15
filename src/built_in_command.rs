@@ -14,7 +14,9 @@ impl BuiltInCommand {
             BuiltInCommand::Echo(_) => BuiltInCommand::Echo(arguments),
             BuiltInCommand::Cd(_) => BuiltInCommand::Cd(arguments.first().unwrap().to_string()),
             BuiltInCommand::Type(_) => BuiltInCommand::Type(arguments.first().unwrap().to_string()),
-            BuiltInCommand::Exit(_) => BuiltInCommand::Exit(arguments.first().unwrap().parse().unwrap()),
+            BuiltInCommand::Exit(_) => {
+                BuiltInCommand::Exit(arguments.first().unwrap().parse().unwrap())
+            }
             _ => c,
         })
     }

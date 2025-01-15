@@ -25,16 +25,17 @@ fn process_input() {
     let command = get_command(&mut input);
     let arguments = parse_arguments(input.clone());
 
-    let command: Box<dyn Command> = BuiltInCommand::try_from_string(command.clone(), arguments.clone())
-        .map(|c| Box::new(c) as Box<dyn Command>)
-        .unwrap_or_else(|_| Box::new(CustomCommand { command, arguments }));
+    let command: Box<dyn Command> =
+        BuiltInCommand::try_from_string(command.clone(), arguments.clone())
+            .map(|c| Box::new(c) as Box<dyn Command>)
+            .unwrap_or_else(|_| Box::new(CustomCommand { command, arguments }));
 
     command.execute();
 }
 
 fn get_command(input: &mut String) -> String {
     if input.starts_with('\'') || input.starts_with('"') {
-        let mut quote_stack : Vec<char> = Vec::new();
+        let mut quote_stack: Vec<char> = Vec::new();
         let mut command = String::new();
         let mut final_pos = 0;
         for (i, c) in input.chars().enumerate() {
@@ -43,8 +44,7 @@ fn get_command(input: &mut String) -> String {
                     quote_stack.push(c);
                 } else if *quote_stack.last().unwrap() == c {
                     quote_stack.pop();
-                }
-                else {
+                } else {
                     command.push(c);
                 }
             } else {
@@ -68,9 +68,9 @@ fn get_command(input: &mut String) -> String {
 fn parse_arguments(input: String) -> Vec<String> {
     let mut result = Vec::new();
     let argument_string = input.trim().to_string();
-    
-    let mut quote_stack : Vec<char> = Vec::new();
-    
+
+    let mut quote_stack: Vec<char> = Vec::new();
+
     let mut argument = String::new();
     let mut escape = false;
     for c in argument_string.chars() {
@@ -98,14 +98,20 @@ fn parse_arguments(input: String) -> Vec<String> {
                 argument.clear();
             }
         } else {
-            if escape && !quote_stack.is_empty() && *quote_stack.first().unwrap() == '"' && c != '"' && c != '\\' && c != '$' {
+            if escape
+                && !quote_stack.is_empty()
+                && *quote_stack.first().unwrap() == '"'
+                && c != '"'
+                && c != '\\'
+                && c != '$'
+            {
                 argument.push('\\');
             }
             argument.push(c);
             escape = false;
         }
     }
-    
+
     if !argument.is_empty() {
         result.push(argument.clone());
     }
@@ -138,7 +144,7 @@ mod tests {
         let result = parse_arguments(input.to_string());
         assert_eq!(result, expected);
     }
-    
+
     #[test]
     fn test_backslash_escaping() {
         let input = r#"echo before\ \ after"#;
@@ -147,7 +153,7 @@ mod tests {
         let result = parse_arguments(input.to_string());
         assert_eq!(result, expected);
     }
-    
+
     #[test]
     fn test_backslash_escape_quotes() {
         let input = "echo \\\'\\\"test shell\\\"\\\'";
