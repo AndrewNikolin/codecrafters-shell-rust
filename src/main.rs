@@ -22,9 +22,8 @@ fn process_input() {
     let stdin = io::stdin();
     let mut input = String::new();
     stdin.read_line(&mut input).unwrap();
-    let input_parts = input.split_whitespace().collect::<Vec<&str>>();
-    let command = input_parts.first().unwrap_or(&"").to_string();
-    let arguments = parse_arguments(input.clone(), &command);
+    let command = get_command(&mut input);
+    let arguments = parse_arguments(input.clone());
 
     let command: Box<dyn Command> = BuiltInCommand::try_from_string(command.clone(), arguments.clone())
         .map(|c| Box::new(c) as Box<dyn Command>)
@@ -33,11 +32,39 @@ fn process_input() {
     command.execute();
 }
 
-fn parse_arguments(input: String, command: &String) -> Vec<String> {
+fn get_command(input: &mut String) -> String {
+    if input.starts_with('\'') || input.starts_with('"') {
+        let mut quote_stack : Vec<char> = Vec::new();
+        let mut command = String::new();
+        let mut final_pos = 0;
+        for (i, c) in input.chars().enumerate() {
+            if c == '\'' || c == '"' {
+                if quote_stack.is_empty() {
+                    quote_stack.push(c);
+                } else if *quote_stack.last().unwrap() == c {
+                    quote_stack.pop();
+                }
+            } else {
+                command.push(c);
+            }
+            if quote_stack.is_empty() {
+                final_pos = i;
+                break;
+            }
+        }
+        input.replace_range(..final_pos, "");
+        return command;
+    }
+
+    let input_parts = input.split_whitespace().collect::<Vec<&str>>();
+    let command = input_parts.first().unwrap_or(&"").to_string();
+    input.replace_range(..command.len(), "");
+    command
+}
+
+fn parse_arguments(input: String) -> Vec<String> {
     let mut result = Vec::new();
-    let argument_string = input
-        .strip_prefix(command).unwrap()
-        .trim().to_string();
+    let argument_string = input.trim().to_string();
     
     let mut quote_stack : Vec<char> = Vec::new();
     
@@ -105,7 +132,7 @@ mod tests {
         let input = "echo 'Hello, World!' \"This 'is'   a test\"";
         let command = "echo".to_string();
         let expected = vec!["Hello, World!", "This 'is'   a test"];
-        let result = parse_arguments(input.to_string(), &command);
+        let result = parse_arguments(input.to_string());
         assert_eq!(result, expected);
     }
     
@@ -114,7 +141,7 @@ mod tests {
         let input = r#"echo before\ \ after"#;
         let command = "echo".to_string();
         let expected = vec![r#"before  after"#];
-        let result = parse_arguments(input.to_string(), &command);
+        let result = parse_arguments(input.to_string());
         assert_eq!(result, expected);
     }
     
@@ -123,16 +150,16 @@ mod tests {
         let input = "echo \\\'\\\"test shell\\\"\\\'";
         let command = "echo".to_string();
         let expected = vec![r#"'"test"#, r#"shell"'"#];
-        let result = parse_arguments(input.to_string(), &command);
+        let result = parse_arguments(input.to_string());
         assert_eq!(result, expected);
     }
-    
+
     #[test]
     fn test_backslash_within_double_quotes() {
         let input = r#"echo "hello\"insidequotes"script\""#;
         let command = "echo".to_string();
         let expected = vec![r#"hello"insidequotesscript""#];
-        let result = parse_arguments(input.to_string(), &command);
+        let result = parse_arguments(input.to_string());
         assert_eq!(result, expected);
     }
 }
