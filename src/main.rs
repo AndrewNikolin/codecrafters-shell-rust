@@ -44,6 +44,9 @@ fn get_command(input: &mut String) -> String {
                 } else if *quote_stack.last().unwrap() == c {
                     quote_stack.pop();
                 }
+                else {
+                    command.push(c);
+                }
             } else {
                 command.push(c);
             }
