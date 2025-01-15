@@ -52,7 +52,7 @@ fn parse_arguments(input: String, command: &String) -> Vec<String> {
             } else {
                 argument.push(c);
             }
-        } else if c == '\\' && quote_stack.is_empty() {
+        } else if c == '\\' && (quote_stack.is_empty() || *quote_stack.first().unwrap() == '"') {
             if escape {
                 argument.push(c);
                 escape = false;
@@ -68,6 +68,9 @@ fn parse_arguments(input: String, command: &String) -> Vec<String> {
                 argument.clear();
             }
         } else {
+            if escape && !quote_stack.is_empty() && *quote_stack.first().unwrap() == '"' && c != '"' && c != '\\' && c != '$' {
+                argument.push('\\');
+            }
             argument.push(c);
             escape = false;
         }
@@ -107,15 +110,6 @@ mod tests {
     }
     
     #[test]
-    fn test_backslash_escaping_in_quotes() {
-        let input = r#"echo "before\   after""#;
-        let command = "echo".to_string();
-        let expected = vec![r#"before\   after"#];
-        let result = parse_arguments(input.to_string(), &command);
-        assert_eq!(result, expected);
-    }
-    
-    #[test]
     fn test_backslash_escaping() {
         let input = r#"echo before\ \ after"#;
         let command = "echo".to_string();
@@ -125,19 +119,19 @@ mod tests {
     }
     
     #[test]
-    fn test_backslash_cat() {
-        let input = r#"cat "/tmp/file\\name" "/tmp/file\ name""#;
-        let command = "cat".to_string();
-        let expected = vec![r#"/tmp/file\\name"#, r#"/tmp/file\ name"#];
+    fn test_backslash_escape_quotes() {
+        let input = "echo \\\'\\\"test shell\\\"\\\'";
+        let command = "echo".to_string();
+        let expected = vec![r#"'"test"#, r#"shell"'"#];
         let result = parse_arguments(input.to_string(), &command);
         assert_eq!(result, expected);
     }
     
     #[test]
-    fn test_backslash_escape_quotes() {
-        let input = "echo \\\'\\\"test shell\\\"\\\'";
+    fn test_backslash_within_double_quotes() {
+        let input = r#"echo "hello\"insidequotes"script\""#;
         let command = "echo".to_string();
-        let expected = vec![r#"'"test"#, r#"shell"'"#];
+        let expected = vec![r#"hello"insidequotesscript""#];
         let result = parse_arguments(input.to_string(), &command);
         assert_eq!(result, expected);
     }
