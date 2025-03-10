@@ -40,14 +40,17 @@ impl CustomCommand {
 
         command.spawn().unwrap().wait().unwrap();
         
-        if let Some(file) = &self.stdout {
+        // append new line if not already present
+        if self.stdout.is_some() {
             use std::io::Write;
-            file.try_clone().unwrap().write_all(b"\n").unwrap();
+            let mut file = self.stdout.as_ref().unwrap().try_clone().unwrap();
+            file.write_all(b"\n").unwrap();
         }
         
-        if let Some(file) = &self.stderr {
+        if self.stderr.is_some() {
             use std::io::Write;
-            file.try_clone().unwrap().write_all(b"\n").unwrap();
+            let mut file = self.stderr.as_ref().unwrap().try_clone().unwrap();
+            file.write_all(b"\n").unwrap();
         }
     }
 
