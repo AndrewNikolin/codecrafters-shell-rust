@@ -39,24 +39,23 @@ impl CustomCommand {
             command.stderr(file.try_clone().unwrap());
         }
         
-        command.spawn().unwrap().wait().unwrap();
-
-        let stdout = command.output().unwrap().stdout;
+        let mut cmd = command.spawn().unwrap();
+        let result = cmd.wait_with_output().unwrap();
+        let stdout = result.stdout;
+        
         if !stdout.is_empty() && stdout.last().unwrap() != &b'\n' {
             if let Some(file) = &self.stdout {
                 use std::io::Write;
                 let mut file = file.try_clone().unwrap();
-                file.flush().unwrap();
                 file.write_all(b"\n").unwrap();
             }
         }
 
-        let stderr = command.output().unwrap().stderr;
+        let stderr = result.stderr;
         if !stderr.is_empty() && stderr.last().unwrap() != &b'\n' {
             if let Some(file) = &self.stderr {
                 use std::io::Write;
                 let mut file = file.try_clone().unwrap();
-                file.flush().unwrap();
                 file.write_all(b"\n").unwrap();
             }
         }
