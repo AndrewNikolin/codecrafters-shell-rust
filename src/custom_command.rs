@@ -46,7 +46,7 @@ impl CustomCommand {
             if let Some(file) = &self.stdout {
                 use std::io::Write;
                 let mut file = file.try_clone().unwrap();
-                file.flush().expect("TODO: panic message");
+                file.flush().unwrap();
                 file.write_all(b"\n").unwrap();
             }
         }
@@ -56,7 +56,7 @@ impl CustomCommand {
             if let Some(file) = &self.stderr {
                 use std::io::Write;
                 let mut file = file.try_clone().unwrap();
-                file.flush().expect("TODO: panic message");
+                file.flush().unwrap();
                 file.write_all(b"\n").unwrap();
             }
         }
