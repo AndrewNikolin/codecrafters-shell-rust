@@ -10,11 +10,13 @@ pub struct BuiltInCommandWrapper {
 impl command::Command for BuiltInCommandWrapper {
     fn execute(&self) {
         let result:Option<String> = self.command.execute();
-        
+
         if let Some(message) = result {
             if let Some(file) = &self.stdout {
                 use std::io::Write;
-                file.try_clone().unwrap().write_all(message.as_bytes()).unwrap();
+                let mut file = file.try_clone().unwrap();
+                file.write_all(message.as_bytes()).unwrap();
+                file.write_all(b"\n").unwrap();
             } else {
                 println!("{}", message);
             }
@@ -49,7 +51,7 @@ impl BuiltInCommand {
             }
             _ => c,
         });
-        
+
         match command {
             Ok(command) => Ok(BuiltInCommandWrapper {
                 command,
