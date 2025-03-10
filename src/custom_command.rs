@@ -1,3 +1,4 @@
+use std::io::Write;
 use crate::command::Command;
 use crate::locate_in_path;
 
@@ -44,7 +45,9 @@ impl CustomCommand {
         if !stdout.is_empty() && stdout.last().unwrap() != &b'\n' {
             if let Some(file) = &self.stdout {
                 use std::io::Write;
-                file.try_clone().unwrap().write_all(b"\n").unwrap();
+                let mut file = file.try_clone().unwrap();
+                file.flush().expect("TODO: panic message");
+                file.write_all(b"\n").unwrap();
             }
         }
 
@@ -52,7 +55,9 @@ impl CustomCommand {
         if !stderr.is_empty() && stderr.last().unwrap() != &b'\n' {
             if let Some(file) = &self.stderr {
                 use std::io::Write;
-                file.try_clone().unwrap().write_all(b"\n").unwrap();
+                let mut file = file.try_clone().unwrap();
+                file.flush().expect("TODO: panic message");
+                file.write_all(b"\n").unwrap();
             }
         }
     }
