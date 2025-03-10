@@ -11,8 +11,12 @@ impl command::Command for BuiltInCommandWrapper {
     fn execute(&self) {
         let result:Option<String> = self.command.execute();
         
-        if let Some(message) = result {
+        if let Some(mut message) = result {
             if let Some(file) = &self.stdout {
+                if !message.ends_with('\n') {
+                    message.push('\n');
+                }
+                
                 use std::io::Write;
                 file.try_clone().unwrap().write_all(message.as_bytes()).unwrap();
             } else {

@@ -39,6 +39,22 @@ impl CustomCommand {
         }
         
         command.spawn().unwrap().wait().unwrap();
+
+        let stdout = command.output().unwrap().stdout;
+        if !stdout.is_empty() && stdout.last().unwrap() != &b'\n' {
+            if let Some(file) = &self.stdout {
+                use std::io::Write;
+                file.try_clone().unwrap().write_all(b"\n").unwrap();
+            }
+        }
+
+        let stderr = command.output().unwrap().stderr;
+        if !stderr.is_empty() && stderr.last().unwrap() != &b'\n' {
+            if let Some(file) = &self.stderr {
+                use std::io::Write;
+                file.try_clone().unwrap().write_all(b"\n").unwrap();
+            }
+        }
     }
     
     pub(crate) fn new(command: String, arguments: Vec<String>) -> Self {
