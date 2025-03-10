@@ -24,13 +24,13 @@ fn process_input() {
     stdin.read_line(&mut input).unwrap();
 
     let mut arguments = parse_parts(input);
-
+    
     let redirect_index = arguments.iter().position(|x| x.contains(">"));
     let redirect_args = arguments[redirect_index.unwrap_or(arguments.len())..].to_vec();
     if redirect_index.is_some() && redirect_args.len() > 1 {
         arguments = arguments[..redirect_index.unwrap()].to_vec();
     }
-
+    
     let command = arguments.first().unwrap_or(&"".to_string()).clone();
     let arguments = arguments[1..redirect_index.unwrap_or(arguments.len())].to_vec();
 
@@ -42,29 +42,20 @@ fn process_input() {
     if redirect_index.is_some() {
         let file = redirect_args[1].clone();
         let redirect_file = if redirect_args[0].contains(">>") {
-            std::fs::OpenOptions::new()
-                .append(true)
-                .create(true)
-                .open(file)
-                .unwrap()
+            std::fs::OpenOptions::new().append(true).create(true).open(file).unwrap()
         } else {
-            std::fs::OpenOptions::new()
-                .write(true)
-                .create(true)
-                .truncate(true)
-                .open(file)
-                .unwrap()
+            std::fs::OpenOptions::new().write(true).create(true).truncate(true).open(file).unwrap()
         };
-
+        
         let redirect_descriptor = redirect_args[0].replace(">", "").replace(" ", "");
-
+        
         match redirect_descriptor.as_str() {
             "1" | "" => command.stdout(redirect_file),
             "2" => command.stderr(redirect_file),
             _ => println!("{}: invalid redirect descriptor", redirect_descriptor),
         }
     }
-
+    
     command.execute();
 }
 
